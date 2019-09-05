@@ -68,6 +68,8 @@ func main() {
 	fs.DurationVar(&cfg.timeout, "timeout", 60*time.Second, "update timeout. Defaults to 60s")
 	fs.DurationVar(&cfg.serverUpdateInterval, "server-update-interval", 10*time.Minute, "interval to update battery info when running a server")
 	fs.BoolVar(&carwings.Debug, "debug", false, "debug mode")
+	fs.IntVar(&cfg.monthly_year, "monthly_year", 2019, "Year value for the fixedmonth query")
+	fs.IntVar(&cfg.monthly_month, "monthly_month", 8, "Month value for the fixedmonth query")
 	fs.Usage = usage(fs)
 
 	ff.Parse(fs, os.Args[1:],
@@ -443,7 +445,7 @@ func runMonthly(s *carwings.Session, cfg config, args []string) error {
 func runFixedMonth(s *carwings.Session, cfg config, args []string) error {
 	fmt.Println("Sending monthly statistics request for fixed month...")
 
-	ms, err := s.GetMonthlyStatistics(time.Date(2019, 8, 1, 12, 0, 0, 0, time.UTC).Local())
+	ms, err := s.GetMonthlyStatistics(time.Date(cfg.monthly_year, cfg.monthly_month, 1, 12, 0, 0, 0, time.UTC).Local())
 	if err != nil {
 		return err
 	}
