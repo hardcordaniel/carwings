@@ -19,7 +19,7 @@ type config struct {
 	timeout              time.Duration
 	serverUpdateInterval time.Duration
 	monthly_year         int
-	monthly_month        time.Month
+	monthly_month        int
 }
 
 const (
@@ -447,7 +447,7 @@ func runMonthly(s *carwings.Session, cfg config, args []string) error {
 func runFixedMonth(s *carwings.Session, cfg config, args []string) error {
 	fmt.Println("Sending monthly statistics request for fixed month...")
 
-	ms, err := s.GetMonthlyStatistics(time.Date(cfg.monthly_year, cfg.monthly_month, 1, 12, 0, 0, 0, time.UTC).Local())
+	ms, err := s.GetMonthlyStatistics(time.Date(cfg.monthly_year, time.Month(cfg.monthly_month), 1, 12, 0, 0, 0, time.UTC).Local())
 	if err != nil {
 		return err
 	}
