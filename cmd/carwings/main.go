@@ -18,7 +18,7 @@ type config struct {
 	units                string
 	timeout              time.Duration
 	serverUpdateInterval time.Duration
-	monthly_year         time.Year
+	monthly_year         int
 	monthly_month        time.Month
 }
 
