@@ -45,6 +45,7 @@ func usage(fs *flag.FlagSet) func() {
 		fmt.Fprintf(os.Stderr, "  locate            Locate vehicle\n")
 		fmt.Fprintf(os.Stderr, "  daily             Daily driving statistics\n")
 		fmt.Fprintf(os.Stderr, "  monthly           Monthly driving statistics\n")
+		fmt.Fprintf(os.Stderr, "  fixedmonth        Monthly driving statistics from hardcoded time\n")
 		fmt.Fprintf(os.Stderr, "  server            Listen for requests on port 8040\n")
 		fmt.Fprintf(os.Stderr, "\n")
 	}
@@ -126,6 +127,9 @@ func main() {
 
 	case "monthly":
 		run = runMonthly
+		
+	case "fixedmonth":
+		run = runFixedMonth
 
 	case "daily":
 		run = runDaily
@@ -399,6 +403,47 @@ func runMonthly(s *carwings.Session, cfg config, args []string) error {
 	fmt.Println("Sending monthly statistics request...")
 
 	ms, err := s.GetMonthlyStatistics(time.Now().Local())
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Monthly Driving Statistics for %s\n", time.Now().Local().Format("January 2006"))
+	fmt.Printf("  Driving efficiency: %.4f %s over %s in %d trips\n",
+		ms.Total.Efficiency*1000, ms.EfficiencyScale, prettyUnits(cfg.units, ms.Total.MetersTravelled), ms.Total.Trips)
+	fmt.Printf("  Driving cost: %.4f at a rate of %.4f/kWh for %.1f kWh => %.4f/%s\n",
+		ms.ElectricityBill, ms.ElectricityRate, ms.Total.PowerConsumed, ms.ElectricityBill/metersToUnits(cfg.units, ms.Total.MetersTravelled), cfg.units)
+	fmt.Println()
+
+	for i := 0; i < len(ms.Dates); i++ {
+		date := ms.Dates[i]
+		var distance int
+		var power float64
+		for j := 0; j < len(date.Trips); j++ {
+			t := date.Trips[j]
+			if j == 0 {
+				fmt.Printf("  Trips on %s\n", t.Started.Local().Format("2006-01-02 Monday"))
+			}
+			distance += t.Meters
+			power += t.PowerConsumedTotal
+
+			fmt.Printf("    %5s %6.1f %s %5.1f %-10.10s %6.1f kWh\n", t.Started.Local().Format("15:04"),
+				metersToUnits(cfg.units, t.Meters), cfg.units, t.Efficiency, ms.EfficiencyScale, t.PowerConsumedTotal/1000)
+		}
+		if distance > 0 {
+			fmt.Println("          ============ ============== ============")
+			efficiency := (power / metersToUnits(cfg.units, distance)) / 10
+			fmt.Printf("          %6.1f %s %5.1f %-10.10s %6.1f kWh\n\n",
+				metersToUnits(cfg.units, distance), cfg.units, efficiency, ms.EfficiencyScale, power/1000)
+		}
+	}
+
+	return nil
+}
+
+func runFixedMonth(s *carwings.Session, cfg config, args []string) error {
+	fmt.Println("Sending monthly statistics request for fixed month...")
+
+	ms, err := s.GetMonthlyStatistics(time.time.Date(2019, 8, 1, 12, 0, 0, 0, time.UTC).Local())
 	if err != nil {
 		return err
 	}
