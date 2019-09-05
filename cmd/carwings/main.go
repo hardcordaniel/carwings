@@ -443,7 +443,7 @@ func runMonthly(s *carwings.Session, cfg config, args []string) error {
 func runFixedMonth(s *carwings.Session, cfg config, args []string) error {
 	fmt.Println("Sending monthly statistics request for fixed month...")
 
-	ms, err := s.GetMonthlyStatistics(time.time.Date(2019, 8, 1, 12, 0, 0, 0, time.UTC).Local())
+	ms, err := s.GetMonthlyStatistics(time.Date(2019, 8, 1, 12, 0, 0, 0, time.UTC).Local())
 	if err != nil {
 		return err
 	}
