@@ -445,14 +445,14 @@ func runMonthly(s *carwings.Session, cfg config, args []string) error {
 }
 
 func runFixedMonth(s *carwings.Session, cfg config, args []string) error {
-	fmt.Println("Sending monthly statistics request for fixed month...")
+	fmt.Printf("Sending monthly statistics request for fixed month %d/%d ...\n", cfg.monthly_month, cfg.monthly_year)
 
 	ms, err := s.GetMonthlyStatistics(time.Date(cfg.monthly_year, time.Month(cfg.monthly_month), 1, 12, 0, 0, 0, time.UTC).Local())
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Monthly Driving Statistics for %s\n", time.Now().Local().Format("January 2006"))
+	fmt.Printf("Monthly Driving Statistics for %s\n", time.Date(cfg.monthly_year, time.Month(cfg.monthly_month), 1, 12, 0, 0, 0, time.UTC).Local().Format("January 2006"))
 	fmt.Printf("  Driving efficiency: %.4f %s over %s in %d trips\n",
 		ms.Total.Efficiency*1000, ms.EfficiencyScale, prettyUnits(cfg.units, ms.Total.MetersTravelled), ms.Total.Trips)
 	fmt.Printf("  Driving cost: %.4f at a rate of %.4f/kWh for %.1f kWh => %.4f/%s\n",
