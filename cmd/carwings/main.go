@@ -18,8 +18,8 @@ type config struct {
 	units                string
 	timeout              time.Duration
 	serverUpdateInterval time.Duration
-	monthly_year         int
-	monthly_month        int
+	monthly_year         time.Year
+	monthly_month        time.Month
 }
 
 const (
